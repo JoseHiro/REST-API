@@ -1,10 +1,12 @@
 const path = require('path');
-
+const dotenv = require('dotenv');
+dotenv.config('.env');
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const multer = require('multer');
 
+const MONGO_DB_KEY = process.env.MONGO_DB;
 
 const feedRoutes = require('./routes/feed');
 const authRoutes = require('./routes/auth');
@@ -62,7 +64,7 @@ app.use((error, req, res, next) => {
 
 mongoose
   .connect(
-    ''
+    MONGO_DB_KEY
   )
   .then(result => {
     app.listen(8080);
