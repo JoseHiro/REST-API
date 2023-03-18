@@ -1,12 +1,10 @@
 const path = require('path');
-const dotenv = require('dotenv');
-dotenv.config('.env');
+// const dotenv = require('dotenv');
+// dotenv.config('.env');
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const multer = require('multer');
-
-const MONGO_DB_KEY = process.env.MONGO_DB;
 
 const feedRoutes = require('./routes/feed');
 const authRoutes = require('./routes/auth');
@@ -14,7 +12,7 @@ const authRoutes = require('./routes/auth');
 const app = express();
 
 const fileStorage = multer.diskStorage({
-  destination: (req, res, cb) => {
+  destination: (req, file, cb) => {
     cb(null, 'images');
   },
   filename: (req, file, cb) => {
@@ -22,22 +20,22 @@ const fileStorage = multer.diskStorage({
   }
 });
 
-const fileFilter = (req, file, cb) =>{
-  if(
+const fileFilter = (req, file, cb) => {
+  if (
     file.mimetype === 'image/png' ||
     file.mimetype === 'image/jpg' ||
     file.mimetype === 'image/jpeg'
   ) {
     cb(null, true);
-  }else{
+  } else {
     cb(null, false);
   }
-}
+};
 
 // app.use(bodyParser.urlencoded()); // x-www-form-urlencoded <form>
 app.use(bodyParser.json()); // application/json
 app.use(
-  multer({ storage: fileStorage, fileFilter: fileFilter}).single('image')
+  multer({ storage: fileStorage, fileFilter: fileFilter }).single('image')
 );
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
@@ -59,14 +57,27 @@ app.use((error, req, res, next) => {
   const status = error.statusCode || 500;
   const message = error.message;
   const data = error.data;
-  res.status(status).json({ message: message, data: data});
+  res.status(status).json({ message: message, data: data });
 });
 
 mongoose
   .connect(
-    MONGO_DB_KEY
+    'mongodb+srv://messi10:goal@cluster0.qzoei47.mongodb.net/messages?retryWrites=true&w=majority'
   )
   .then(result => {
-    app.listen(8080);
+    const server = app.listen(8080);
+  //   const io = require("./socket").init(server, {
+  //     cors: {
+  //        origin: "http://localhost:3000",
+  //        methods: ["GET", "POST"],
+  //     },
+  //  });
+  //   io.on('connection', socket => {
+  //     console.log('Client connected');
+  //   });
+  const io = require('./socket').init(server);
+  io.on('connection', socket => {
+  console.log('Client connected');
+})
   })
   .catch(err => console.log(err));
