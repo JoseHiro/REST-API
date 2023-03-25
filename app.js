@@ -10,7 +10,7 @@ const feedRoutes = require('./routes/feed');
 const authRoutes = require('./routes/auth');
 
 const app = express();
-
+const MONGO_DB = process.env.MONGO_DB;
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'images');
@@ -62,7 +62,7 @@ app.use((error, req, res, next) => {
 
 mongoose
   .connect(
-    ''
+    MONGO_DB
   )
   .then(result => {
     const server = app.listen(8080);
